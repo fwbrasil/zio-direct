@@ -72,15 +72,18 @@ trait WithZioType extends MacroBase {
     }
 
     // Compares erased values of the two effects
-    def isEffectOf(other: TypeRepr): Boolean =
-      other match {
-        case AppliedType(root, args) if (args.length == variances.length) =>
-          root =:= this.tpe
-        case Dealiased(AppliedType(root, args)) if (args.length == variances.length) =>
-          root =:= this.tpe
-        case _ =>
-          false
-      }
+    def isEffectOf(other: TypeRepr): Boolean = true
+      // other match {
+      //   case AppliedType(root, args) if (args.length == variances.length) =>
+      //     report.info("aaaaaa" + (root, this.tpe).toString)
+      //     root =:= this.tpe
+      //   case Dealiased(AppliedType(root, args)) if (args.length == variances.length) =>
+      //     report.info("bbbbbb" + (root, this.tpe).toString)
+      //     root =:= this.tpe
+      //   case _ =>
+      //     report.info("ccccc                " + this.tpe.typeSymbol.)
+      //     false
+      // }
 
     // array size of arrays if they need to be reconstructed with elements inside
     // private def oneIfExists(index: Int) = if (index != -1) 1 else 0
@@ -122,9 +125,9 @@ trait WithZioType extends MacroBase {
     def unapply(otherTpe: TypeRepr) =
       otherTpe match
         // In the type-spec, need to have a way to specify how many args
-        case AppliedType(root, typeArgs) if (typeArgs.length == variances.length && root =:= this.tpe) =>
+        case AppliedType(root, typeArgs) if (typeArgs.length == variances.length) =>
           Some(extractTypes(typeArgs))
-        case Dealiased(AppliedType(root, typeArgs)) if (typeArgs.length == variances.length && root =:= this.tpe) =>
+        case Dealiased(AppliedType(root, typeArgs)) if (typeArgs.length == variances.length) =>
           Some(extractTypes(typeArgs))
         case _ =>
           None
@@ -234,7 +237,7 @@ trait WithZioType extends MacroBase {
         case effectType(r, e, a) =>
           ZioType(effectType)(r, e, a)
         case _ =>
-          report.errorAndAbort(s"The type of ${Format.Term(zio)} is not a ${effectType.tpe.show}. It is: ${Format.TypeRepr(zio.tpe.widen)}")
+          report.errorAndAbort(s"The type of ${Format.Term(zio)} is not a ${effectType.tpe.show}. It is: ${Format.TypeRepr(zio.tpe)}  ${zio.tpe} ${effectType.tpe}")
 
     // In this case the error is considered to be Nothing (since we are not wrapping error handling for pure values)
     // and the environment type is considered to be Any (it will be removed via later `ZioType.union` calls if it can be specialized).
